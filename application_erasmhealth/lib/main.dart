@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/app_state.dart';
-import 'screens/login_page.dart';
 
+import 'package:application_erasmhealth/screens/loginPage.dart';
+import 'package:application_erasmhealth/screens/homePage.dart';
+import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/utils/impact.dart';
+
+
+/// Entry point of the app
 void main() {
-  runApp(
+  runApp( //initialize Provider at the root of the app
     ChangeNotifierProvider(
-      create: (_) => AppState(),
+      // Inject ImpactService into AppState
+      create: (_) => AppState(Impact()),
       child: const MyApp(),
-    ),
+    ), 
   );
 }
 
@@ -18,13 +24,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Erasmhealth App',
       debugShowCheckedModeBanner: false,
-      title: 'Party Readiness App',
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-        fontFamily: 'Arial',
+      home: Consumer<AppState>(
+        builder: (context, appState, _) {
+          // Switch screen based on login state
+          return appState.isLoggedIn
+              ? const HomePage()
+              : LoginPage();
+        },
       ),
-      home: const LoginPage(),
     );
   }
 }
