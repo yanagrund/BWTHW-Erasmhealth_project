@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+//username: zuoMU0WcFe
+//password: 12345678!
+
 class Impact {
   final String baseUrl = 'https://impact.dei.unipd.it/bwthw/';
   final String pingEndpoint = 'gate/v1/ping/';
