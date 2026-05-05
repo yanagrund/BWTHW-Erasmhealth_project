@@ -8,6 +8,7 @@ import 'package:application_erasmhealth/utils/impact.dart';
 
 
 /// Entry point of the app
+/// // Initializes the Provider for state management and runs the app
 void main() {
   runApp( //initialize Provider at the root of the app
     ChangeNotifierProvider(
