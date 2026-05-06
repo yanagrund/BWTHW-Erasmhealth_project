@@ -1,4 +1,3 @@
-import 'dart:math';
 
 class HealthScoreService {
   static double compute({
@@ -31,15 +30,16 @@ class HealthScoreService {
   }
 
   static double _sleepScore(double h) {
-    if (h >= 7 && h <= 9) return 100;
+    if (h >= 7 && h <= 10) return 100;
     if (h < 7) return (h / 7) * 100;
-    return (9 / h) * 100;
+    return (10 / h) * 100;
   }
 
   static double _heartScore(double current, double baseline) {
     double diff = current - baseline;
-    if (diff <= 0) return 100;
+    if (-15 <= diff && diff <= 0) return 100;
     if (diff >= 20) return 0;
+    if(diff<-15) return 100 - (-diff / 20) * 100;
     return 100 - (diff / 20) * 100;
   }
 
