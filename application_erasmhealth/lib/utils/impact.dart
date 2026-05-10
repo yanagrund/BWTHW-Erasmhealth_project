@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -124,18 +123,11 @@ class Impact {
         '$baseUrl$stepsEndpoint$username/daterange/start_date/${_fmt(startDt)}/end_date/${_fmt(endDt)}/',
       );
 
-      debugPrint('[Daterange] status: ${response.statusCode}');
-      debugPrint(
-        '[Daterange] body (first 300): ${response.body.substring(0, response.body.length.clamp(0, 300))}',
-      );
-
       if (response.statusCode != 200) return [];
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final List<dynamic>? days = json['data'] as List<dynamic>?;
       if (days == null || days.isEmpty) return [];
-
-      debugPrint('[Daterange] total days in response: ${days.length}');
 
       final datesWithData =
           days
@@ -147,12 +139,9 @@ class Impact {
               .toList()
             ..sort();
 
-      debugPrint('[Daterange] dates with data: $datesWithData');
-
       if (datesWithData.length <= count) return datesWithData;
       return datesWithData.sublist(datesWithData.length - count);
-    } catch (e, stack) {
-      debugPrint('[Daterange] exception: $e\n$stack');
+    } catch (e) {
       return [];
     }
   }
@@ -181,11 +170,6 @@ class Impact {
       final heartJson = jsonDecode(results[1].body) as Map<String, dynamic>;
       final restingJson = jsonDecode(results[2].body) as Map<String, dynamic>;
       final stepsJson = jsonDecode(results[3].body) as Map<String, dynamic>;
-
-      debugPrint(
-        '[Fetch $date] statuses: sleep=${results[0].statusCode} '
-        'heart=${results[1].statusCode} resting=${results[2].statusCode} steps=${results[3].statusCode}',
-      );
 
       // Helper: safely reach json["data"]["data"]
       dynamic inner(Map<String, dynamic> j) => (j["data"] as Map?)?["data"];
@@ -233,19 +217,13 @@ class Impact {
         }
       }
 
-      debugPrint(
-        '[Fetch $date] parsed — sleep: ${sleep.toStringAsFixed(2)} h, '
-        'heart: ${heart.toStringAsFixed(1)} bpm, resting: $resting bpm, steps: $steps',
-      );
-
       return {
         "sleep": sleep,
         "heart": heart,
         "resting": resting,
         "steps": steps,
       };
-    } catch (e, stack) {
-      debugPrint('[Fetch] exception for $date: $e\n$stack');
+    } catch (e) {
       return {"sleep": 0.0, "heart": 70.0, "resting": 70.0, "steps": 0};
     }
   }
