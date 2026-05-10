@@ -10,6 +10,7 @@ class AppState extends ChangeNotifier {
 
   bool isLoggedIn = false;
   double score = 0;
+  double yesterdayScore = 0;
 
   // health data
   double sleep = 0;
@@ -43,12 +44,21 @@ class AppState extends ChangeNotifier {
 
     isLoggedIn = false;
     score = 0;
+    yesterdayScore = 0;
 
     notifyListeners();
   }
 
   Future<void> fetchAndComputeScore() async {
-    final data = await impactService.fetchHealthData();
+    final latestDates = await impactService.findLatestDatesWithData(count: 2);
+
+    if (latestDates.isEmpty) {
+      notifyListeners();
+      return;
+    }
+
+    final latestDate = latestDates.last;
+    final data = await impactService.fetchHealthDataForDate(latestDate);
 
     sleep = data["sleep"];
     heart = data["heart"];
@@ -61,6 +71,21 @@ class AppState extends ChangeNotifier {
       restingHR: resting,
       steps: steps,
     );
+
+
+    if (latestDates.length >= 2) {
+      final previousDate = latestDates[latestDates.length - 2];
+      final previousData = await impactService.fetchHealthDataForDate(previousDate);
+
+      yesterdayScore = HealthScoreService.compute(
+        sleep: previousData["sleep"],
+        currentHR: previousData["heart"],
+        restingHR: previousData["resting"],
+        steps: previousData["steps"],
+      );
+
+    }
+
 
     notifyListeners();
   }
