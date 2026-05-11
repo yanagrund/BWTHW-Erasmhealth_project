@@ -13,10 +13,7 @@ class RecoveryPage extends StatefulWidget {
 class _RecoveryPageState extends State<RecoveryPage> {
   late Timer _timer;
 
-  // Mock: yesterday's score. In a real app this comes from local storage or backend.
-  static const double _yesterdayScore = 45.0;
-
-  // Assumed recovery rate used to estimate time to full health.
+  // Assumed recovery rate used to estimate time to full health. (Could be made more precise later)
   static const double _recoveryRatePerHour = 5.0;
 
   @override
@@ -66,7 +63,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final score = appState.score;
-    final improvement = score - _yesterdayScore;
+    final improvement = score - appState.yesterdayScore;
     final color = _getColor(score);
 
     return Scaffold(
