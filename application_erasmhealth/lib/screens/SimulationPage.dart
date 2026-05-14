@@ -77,10 +77,13 @@ class _SimulationPageState extends State<SimulationPage> {
             "💀 Tomorrow morning is going to be a difficult experience.";
       } else if (alcoholDrinks >= 7) {
         funnyMessage =
-            "🚨 Bro thinks this is a university movie montage.";
+            "🚨 Don't be surprised to black out...";
       }
     });
   }
+
+  //The variable bonus stores the temporary effect of the simulated behavior on the health score before applying it to the final simulated score
+
 
   /// WATER
   void addWater() {
@@ -102,7 +105,7 @@ class _SimulationPageState extends State<SimulationPage> {
             "🚰 Your kidneys are extremely proud of you.";
       } else if (waterGlasses >= 5) {
         funnyMessage =
-            "🚽 You now spend more time in the bathroom than outside.";
+            "🚽 You now spend all your time in the bathroom.";
       }
     });
   }
@@ -112,26 +115,60 @@ class _SimulationPageState extends State<SimulationPage> {
     setState(() {
       sleepHours++;
 
-      double bonus = simulatedScore < 50 ? 9 : 6;
+      double bonus = 0;
+
+      /// OPTIMAL SLEEP ZONE
+      if (sleepHours <= 2) {
+        bonus = 6;
+      }
+
+      /// GOOD BUT LESS EFFECTIVE
+      else if (sleepHours <= 4) {
+        bonus = 4;
+      }
+
+      /// TOO MUCH SLEEP
+      else if (sleepHours <= 6) {
+        bonus = -2;
+      }
+
+      /// EXTREME OVERSLEEPING
+      else {
+        bonus = -5;
+      }
 
       simulatedScore += bonus;
 
       if (simulatedScore > 100) {
-        simulatedScore = 100;
+       simulatedScore = 100;
       }
 
+      if (simulatedScore < 0) {
+        simulatedScore = 0;
+      }
+
+      /// MESSAGES
       if (sleepHours == 1) {
         funnyMessage =
             "😴 Your body appreciates the recovery.";
-      } else if (sleepHours == 3) {
+      }
+
+      else if (sleepHours == 3) {
         funnyMessage =
             "🛌 Sleep is carrying your entire lifestyle right now.";
-      } else if (sleepHours >= 6) {
+      }
+
+      else if (sleepHours == 5) {
+        funnyMessage =
+            "🤨 That's starting to become suspiciously too much sleep.";
+      }
+
+      else if (sleepHours >= 7) {
         funnyMessage =
             "📱 Your phone almost filed a missing person report.";
       }
     });
-  }
+    }
 
   /// SPORT
   void addActivity() {
