@@ -13,6 +13,7 @@ class AppState extends ChangeNotifier {
 
   // health data
   double sleep = 0;
+  List<String> sleepTypes = [];
   double heart = 70;
   double resting = 70;
   int steps = 0;
@@ -51,9 +52,12 @@ class AppState extends ChangeNotifier {
     final data = await impactService.fetchHealthData();
 
     sleep = data["sleep"];
+    sleepTypes = data["sleepTypes"] ?? [];
     heart = data["heart"];
     resting = data["resting"];
     steps = data["steps"];
+
+    print("Sleep Types: $sleepTypes"); // Print sleep types
 
     score = HealthScoreService.compute(
       sleep: sleep,

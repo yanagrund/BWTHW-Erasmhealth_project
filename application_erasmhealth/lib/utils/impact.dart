@@ -32,7 +32,7 @@ class Impact {
     return sp.getString('access');
   }
 
-  Future<http.Response> authorizedGet(String url) async { // Makes an authorized GET request to the given URL
+  Future<http.Response> _authorizedGet(String url) async { // Makes an authorized GET request to the given URL
     final token = await getToken();
 
     return await http.get(
@@ -102,7 +102,7 @@ class Impact {
   Future<int> getSteps() async { // Retrieves the total number of steps for the current day by making an authorized GET request to the steps endpoint. It parses the JSON response and sums up the values of the "value" field in the "data" array. If there is no data, it returns 0.
     final day = getTodayDate();
 
-    final response = await authorizedGet(
+    final response = await _authorizedGet(
         "$baseUrl$stepsEndpoint$username/day/$day/");
 
     final json = jsonDecode(response.body);
@@ -120,7 +120,7 @@ class Impact {
   Future<double> getSleep() async { // Retrieves the total hours of sleep for the current day by making an authorized GET request to the sleep endpoint. It parses the JSON response and sums up the values of the "value" field in the "data" array. If there is no data, it returns 0.
     final day = getTodayDate();
 
-    final response = await authorizedGet(
+    final response = await _authorizedGet(
         "$baseUrl$sleepEndpoint$username/day/$day/");
 
     final json = jsonDecode(response.body);
@@ -138,7 +138,7 @@ class Impact {
   Future<double> getHeartRate() async { // Retrieves the current heart rate for the current day by making an authorized GET request to the heart rate endpoint. It parses the JSON response and returns the value of the "value" field in the last item of the "data" array. If there is no data, it returns 70.
     final day = getTodayDate();
 
-    final response = await authorizedGet(
+    final response = await _authorizedGet(
         "$baseUrl$heartRateEndpoint$username/day/$day/");
 
     final json = jsonDecode(response.body);
@@ -151,7 +151,7 @@ class Impact {
   Future<double> getRestingHeartRate() async { // Retrieves the resting heart rate for the current day by making an authorized GET request to the resting heart rate endpoint. It parses the JSON response and returns the value of the "value" field in the last item of the "data" array. If there is no data, it returns 70.
     final day = getTodayDate();
 
-    final response = await authorizedGet(
+    final response = await _authorizedGet(
         "$baseUrl$restingHeartRateEndpoint$username/day/$day/");
 
     final json = jsonDecode(response.body);
