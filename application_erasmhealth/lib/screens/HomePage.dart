@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/screens/RecoveryPage.dart';
+import 'package:application_erasmhealth/screens/SimulationPage.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -55,12 +57,24 @@ class HomePage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.show_chart),
               title: const Text("Simulation"),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (_) => const SimulationPage(),),
+                 );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.healing),
               title: const Text("Recovery"),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RecoveryPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
@@ -73,10 +87,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      appBar: AppBar(
-        title: const Text("Home"),
-        backgroundColor: color,
-      ),
+      appBar: AppBar(title: const Text("Home"), backgroundColor: color),
 
       body: Container(
         width: double.infinity,
@@ -103,10 +114,7 @@ class HomePage extends StatelessWidget {
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 20, color: Colors.white),
               ),
             ),
 
