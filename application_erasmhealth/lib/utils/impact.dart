@@ -219,7 +219,6 @@ class Impact {
 
       return {
         "sleep": sleep,
-        "sleepTypes": sleepTypes,
         "heart": heart,
         "resting": resting,
         "steps": steps,
@@ -227,7 +226,6 @@ class Impact {
     } catch (e) {
       return {
         "sleep": 0.0,
-        "sleepTypes": [],
         "heart": 70.0,
         "resting": 70.0,
         "steps": 0,
