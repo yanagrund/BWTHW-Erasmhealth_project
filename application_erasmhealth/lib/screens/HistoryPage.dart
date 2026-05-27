@@ -1,50 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/screens/RecoveryPage.dart';
+import 'package:application_erasmhealth/screens/SimulationPage.dart';
 import 'package:application_erasmhealth/services/History_service.dart';
 import 'package:application_erasmhealth/services/health_score.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
   @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final List<double> _scores = [0.0, 0.0, 0.0];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _updateScore(int tabIndex, double score) {
+    if (mounted) setState(() => _scores[tabIndex] = score);
+  }
+
+  Color _getColor(double score) {
+    if (score <= 50) return Colors.red;
+    if (score <= 75) return Colors.orange;
+    return Colors.green;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("History"),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "Yesterday"),
-              Tab(text: "Last Week"),
-              Tab(text: "Last Month"),
-            ],
-          ),
-        ),
-        body: const TabBarView(
+    final appState = Provider.of<AppState>(context, listen: false);
+    final color = _getColor(_scores[_tabController.index]);
+
+    return Scaffold(
+      backgroundColor: color,
+      drawer: Drawer(
+        child: ListView(
           children: [
-            HistorySubPage(period: "Yesterday"),
-            HistorySubPage(period: "Last Week"),
-            HistorySubPage(period: "Last Month"),
+            const DrawerHeader(
+              child: Text('Menu', style: TextStyle(fontSize: 24)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('History'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.show_chart),
+              title: const Text('Simulation'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SimulationPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.healing),
+              title: const Text('Recovery'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RecoveryPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Logout'),
+              onTap: () => appState.logout(),
+            ),
           ],
         ),
+      ),
+      appBar: AppBar(
+        title: const Text('History'),
+        backgroundColor: color,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Yesterday'),
+            Tab(text: 'Last Week'),
+            Tab(text: 'Last Month'),
+          ],
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          HistorySubPage(
+            period: 'Yesterday',
+            onScoreLoaded: (s) => _updateScore(0, s),
+          ),
+          HistorySubPage(
+            period: 'Last Week',
+            onScoreLoaded: (s) => _updateScore(1, s),
+          ),
+          HistorySubPage(
+            period: 'Last Month',
+            onScoreLoaded: (s) => _updateScore(2, s),
+          ),
+        ],
       ),
     );
   }
 }
 
-
 class HistorySubPage extends StatefulWidget {
   final String period;
-  const HistorySubPage({super.key, required this.period});
+  final void Function(double) onScoreLoaded;
+
+  const HistorySubPage({
+    super.key,
+    required this.period,
+    required this.onScoreLoaded,
+  });
 
   @override
   State<HistorySubPage> createState() => _HistorySubPageState();
 }
 
 class _HistorySubPageState extends State<HistorySubPage> {
-  // Local state for historical data
   bool isLoading = true;
   double score = 0.0;
   Map<String, dynamic> data = {};
@@ -55,32 +160,31 @@ class _HistorySubPageState extends State<HistorySubPage> {
     _loadHistoricalData();
   }
 
-  // Calculate the target date based on the tab period
-  DateTime _getTargetDate() {
-    final now = DateTime.now();
-    if (widget.period == "Yesterday") return now.subtract(const Duration(days: 1));
-    if (widget.period == "Last Week") return now.subtract(const Duration(days: 7));
-    return now.subtract(const Duration(days: 30)); // Last Month
+  Color _getColor(double score) {
+    if (score <= 50) return Colors.red;
+    if (score <= 75) return Colors.orange;
+    return Colors.green;
   }
 
   Future<void> _loadHistoricalData() async {
     final appState = Provider.of<AppState>(context, listen: false);
     final historyService = HistoryService(appState.impactService);
-    Map<String, dynamic> fetchedData;
 
-    if (widget.period == "Yesterday") {
-      fetchedData = await historyService.fetchHistoryData(DateTime.now().subtract(const Duration(days: 1)));
+    Map<String, dynamic> fetchedData;
+    if (widget.period == 'Yesterday') {
+      fetchedData = await historyService.fetchHistoryData(
+        DateTime.now().subtract(const Duration(days: 1)),
+      );
     } else {
-    // "Last Week" (7) or "Last Month" (30)
-      int days = (widget.period == "Last Week") ? 7 : 30;
+      final days = (widget.period == 'Last Week') ? 7 : 30;
       fetchedData = await historyService.fetchRangeData(days);
     }
-    // Compute score locally
+
     final computedScore = HealthScoreService.compute(
-      sleep: fetchedData["sleep"],
-      currentHR: fetchedData["heart"],
-      restingHR: fetchedData["resting"],
-      steps: fetchedData["steps"],
+      sleep: (fetchedData['sleep'] as num).toDouble(),
+      currentHR: (fetchedData['heart'] as num).toDouble(),
+      restingHR: (fetchedData['resting'] as num).toDouble(),
+      steps: fetchedData['steps'] as int,
     );
 
     if (mounted) {
@@ -89,70 +193,145 @@ class _HistorySubPageState extends State<HistorySubPage> {
         score = computedScore;
         isLoading = false;
       });
+      widget.onScoreLoaded(computedScore);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final color = _getColor(score);
+
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.white),
+      );
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        Text("History", style: Theme.of(context).textTheme.headlineMedium),
-        Text("Period: ${widget.period}", style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 30),
-        
-        // Circular Score
-        Center(
-          child: Column(
-            children: [
-              Text("${widget.period}'s score"),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: 120, height: 120,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircularProgressIndicator(value: score / 100, strokeWidth: 8),
-                    Text("${score.toInt()}%", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  ],
+    final sleep = (data['sleep'] as num).toDouble();
+    final steps = data['steps'] as int;
+    final heart = (data['heart'] as num).toDouble();
+    final resting = (data['resting'] as num).toDouble();
+
+    return Container(
+      color: color,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              children: [
+                Text(
+                  '${score.toInt()}',
+                  style: const TextStyle(
+                    fontSize: 80,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  '${widget.period} score',
+                  style: const TextStyle(fontSize: 20, color: Colors.white70),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: LinearProgressIndicator(
+                      value: score / 100,
+                      minHeight: 18,
+                      backgroundColor: Colors.white30,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _buildMetricCard(
+                  Icons.bed,
+                  'Sleep',
+                  '${sleep.toStringAsFixed(1)} hrs',
+                  sleep / 8,
+                ),
+                const SizedBox(height: 12),
+                _buildMetricCard(
+                  Icons.directions_run,
+                  'Steps',
+                  '$steps steps',
+                  steps / 10000,
+                ),
+                const SizedBox(height: 12),
+                _buildMetricCard(
+                  Icons.favorite,
+                  'Heart Rate',
+                  '${heart.toInt()} bpm',
+                  heart / 150,
+                ),
+                const SizedBox(height: 12),
+                _buildMetricCard(
+                  Icons.monitor_heart,
+                  'Resting HR',
+                  '${resting.toInt()} bpm',
+                  resting / 100,
+                ),
+              ],
+            ),
           ),
         ),
-        const Divider(height: 50),
-        
-        // Metrics based on the local 'data' map
-        _buildScoreItem(Icons.bed, "Sleep", (data["sleep"] ?? 0) / 8),
-        _buildScoreItem(Icons.directions_run, "Steps", (data["steps"] ?? 0) / 10000),
-        _buildScoreItem(Icons.favorite, "Heart Rate", (data["heart"] ?? 70) / 150),
-        _buildScoreItem(Icons.monitor_heart, "Resting HR", (data["resting"] ?? 70) / 100),
-      ],
+      ),
     );
   }
 
-  Widget _buildScoreItem(IconData icon, String label, double progress) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+  Widget _buildMetricCard(
+    IconData icon,
+    String label,
+    String valueText,
+    double progress,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Row(
         children: [
-          SizedBox(width: 50, child: Icon(icon)),
+          Icon(icon, color: Colors.white, size: 28),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label),
-                const SizedBox(height: 4),
-                LinearProgressIndicator(value: progress.clamp(0.0, 1.0), minHeight: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      valueText,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(
+                    value: progress.clamp(0.0, 1.0),
+                    minHeight: 8,
+                    backgroundColor: Colors.white30,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(width: 15),
-          Text("${(progress * 100).toInt()}%"),
         ],
       ),
     );
