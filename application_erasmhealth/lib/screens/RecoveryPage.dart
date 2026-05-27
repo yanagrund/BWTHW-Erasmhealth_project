@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/screens/HistoryPage.dart';
+import 'package:application_erasmhealth/screens/SimulationPage.dart';
 
 class RecoveryPage extends StatefulWidget {
   const RecoveryPage({super.key});
@@ -96,7 +97,13 @@ class _RecoveryPageState extends State<RecoveryPage> {
             ListTile(
               leading: const Icon(Icons.show_chart),
               title: const Text('Simulation'),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SimulationPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.healing),

@@ -48,7 +48,7 @@ class HomePage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home),
               title: const Text("Home"),
-              onTap: () {},
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.history),
