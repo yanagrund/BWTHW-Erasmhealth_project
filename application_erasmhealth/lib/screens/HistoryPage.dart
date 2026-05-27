@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/screens/RecoveryPage.dart';
 import 'package:application_erasmhealth/screens/SimulationPage.dart';
-import 'package:application_erasmhealth/services/History_service.dart';
+import 'package:application_erasmhealth/services/history_service.dart';
 import 'package:application_erasmhealth/services/health_score.dart';
 
 class HistoryScreen extends StatefulWidget {
