@@ -65,6 +65,7 @@ class AppState extends ChangeNotifier {
     resting = data["resting"];
     steps = data["steps"];
 
+
     score = HealthScoreService.compute(
       sleep: sleep,
       currentHR: heart,

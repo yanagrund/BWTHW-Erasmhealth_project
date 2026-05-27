@@ -224,7 +224,12 @@ class Impact {
         "steps": steps,
       };
     } catch (e) {
-      return {"sleep": 0.0, "heart": 70.0, "resting": 70.0, "steps": 0};
+      return {
+        "sleep": 0.0,
+        "heart": 70.0,
+        "resting": 70.0,
+        "steps": 0,
+      };
     }
   }
 }

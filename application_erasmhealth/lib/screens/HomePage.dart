@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/screens/HistoryPage.dart';
 import 'package:application_erasmhealth/screens/RecoveryPage.dart';
 import 'package:application_erasmhealth/screens/SimulationPage.dart';
 
@@ -47,12 +48,18 @@ class HomePage extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.home),
               title: const Text("Home"),
-              onTap: () {},
+              onTap: () => Navigator.pop(context),
             ),
             ListTile(
               leading: const Icon(Icons.history),
               title: const Text("History"),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.show_chart),

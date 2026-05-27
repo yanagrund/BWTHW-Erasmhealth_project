@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/screens/HistoryPage.dart';
 import 'package:application_erasmhealth/screens/RecoveryPage.dart';
 
 class SimulationPage extends StatefulWidget {
@@ -242,7 +243,13 @@ class _SimulationPageState extends State<SimulationPage> {
             ListTile(
               leading: const Icon(Icons.history),
               title: const Text("History"),
-              onTap: () {},
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
+              },
             ),
 
             ListTile(
