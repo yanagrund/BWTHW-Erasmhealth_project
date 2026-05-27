@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:application_erasmhealth/states/app_state.dart'; 
-import 'package:application_erasmhealth/utils/impact.dart';
-import 'package:application_erasmhealth/services/history_service.dart';
-import 'package:application_erasmhealth/services/health_score.dart';// Adjust path
-// --- PLACEHOLDER: Import your actual service file here ---
-// import 'package:your_app/services/score_service.dart';
+import 'package:application_erasmhealth/providers/app_state.dart';
+import 'package:application_erasmhealth/services/History_service.dart';
+import 'package:application_erasmhealth/services/health_score.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -67,7 +64,8 @@ class _HistorySubPageState extends State<HistorySubPage> {
   }
 
   Future<void> _loadHistoricalData() async {
-    final historyService = HistoryService(Impact());
+    final appState = Provider.of<AppState>(context, listen: false);
+    final historyService = HistoryService(appState.impactService);
     Map<String, dynamic> fetchedData;
 
     if (widget.period == "Yesterday") {
