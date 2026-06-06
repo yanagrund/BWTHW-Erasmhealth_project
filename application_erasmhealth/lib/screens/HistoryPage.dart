@@ -1,3 +1,4 @@
+import 'package:application_erasmhealth/screens/homePage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
@@ -61,7 +62,10 @@ class _HistoryScreenState extends State<HistoryScreen>
               title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                );
               },
             ),
             ListTile(

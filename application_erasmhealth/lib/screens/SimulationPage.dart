@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/screens/HistoryPage.dart';
 import 'package:application_erasmhealth/screens/RecoveryPage.dart';
+import 'homePage.dart';
 
 class SimulationPage extends StatefulWidget {
   const SimulationPage({super.key});
@@ -236,7 +237,10 @@ class _SimulationPageState extends State<SimulationPage> {
               title: const Text("Home"),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                );
               },
             ),
 
