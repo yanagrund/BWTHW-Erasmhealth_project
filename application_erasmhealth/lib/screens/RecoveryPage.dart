@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/screens/HistoryPage.dart';
 import 'package:application_erasmhealth/screens/SimulationPage.dart';
+import 'package:application_erasmhealth/screens/HomePage.dart';
 
 class RecoveryPage extends StatefulWidget {
   const RecoveryPage({super.key});
@@ -80,7 +81,10 @@ class _RecoveryPageState extends State<RecoveryPage> {
               title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomePage()),
+                );
               },
             ),
             ListTile(
