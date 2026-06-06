@@ -1,10 +1,11 @@
+import 'package:application_erasmhealth/screens/Cocktail_Animation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:application_erasmhealth/screens/loginPage.dart';
 import 'package:application_erasmhealth/screens/homePage.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/utils/impact.dart';
+import 'package:application_erasmhealth/screens/Cocktail_Animation.dart';
 
 
 /// Entry point of the app
@@ -33,12 +34,14 @@ class MyApp extends StatelessWidget {
       title: 'Erasmhealth App',
       debugShowCheckedModeBanner: false,
       home: Consumer<AppState>(
-        builder: (context, appState, _) {
-          // Switch screen based on login state
-          return appState.isLoggedIn
-              ? const HomePage()
-              : LoginPage();
-        },
+          builder: (context, appState, _) {
+
+          if (appState.isLoggedIn) {
+              return const HomePage();
+          }
+
+          return const CocktailAnimation();
+          },
       ),
     );
   }
