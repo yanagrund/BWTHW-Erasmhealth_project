@@ -9,13 +9,18 @@ import 'package:application_erasmhealth/utils/impact.dart';
 
 /// Entry point of the app
 /// // Initializes the Provider for state management and runs the app
-void main() {
-  runApp( //initialize Provider at the root of the app
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final appState = AppState(Impact());
+
+  await appState.restoreLoginState();
+
+  runApp(
     ChangeNotifierProvider(
-      // Inject ImpactService into AppState
-      create: (_) => AppState(Impact()),
+      create: (_) => appState,
       child: const MyApp(),
-    ), 
+    ),
   );
 }
 
