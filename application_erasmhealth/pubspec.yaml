@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: 
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.3
   provider:
 
 dev_dependencies:

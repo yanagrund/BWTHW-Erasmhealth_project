@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:application_erasmhealth/utils/impact.dart';
 import 'package:application_erasmhealth/services/health_score.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppState extends ChangeNotifier {
   final Impact impactService;
@@ -26,6 +27,8 @@ class AppState extends ChangeNotifier {
 
     if (success) {
       isLoggedIn = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
 
       await fetchAndComputeScore(); 
       startAutoRefresh();           
@@ -36,6 +39,19 @@ class AppState extends ChangeNotifier {
     return success;
   }
 
+  Future<void> restoreLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      await fetchAndComputeScore();
+      startAutoRefresh();
+    }
+
+    notifyListeners();
+  }
+
   /// LOGOUT
   Future<void> logout() async {
     await impactService.logout();
@@ -43,11 +59,13 @@ class AppState extends ChangeNotifier {
     _timer?.cancel();
 
     isLoggedIn = false;
-    score = 0;
-    yesterdayScore = 0;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
 
     notifyListeners();
   }
+
+  
 
   Future<void> fetchAndComputeScore() async {
     final latestDates = await impactService.findLatestDatesWithData(count: 2);
