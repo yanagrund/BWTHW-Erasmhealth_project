@@ -1,6 +1,6 @@
 # BWTHW – Erasmhealth Project
 
-A mobile health-tracking app built for the BWTHW (Be Well, Think Healthy, Work Well) course at Erasmus. The app connects to the [IMPACT](https://impact.dei.unipd.it/bwthw/) platform to retrieve wearable health data, computes a personal wellness score, and helps users understand how lifestyle choices affect their recovery.
+A mobile health-tracking app built for the BWTHW (Biomedical Wearable Technologies for Healthcare and Wellbeing) course at Unipd. The app connects to the [IMPACT](https://impact.dei.unipd.it/bwthw/) platform to retrieve wearable health data, computes a personal wellness score, and helps users understand how lifestyle choices affect their recovery.
 
 ## Repository contents
 
