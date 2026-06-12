@@ -88,6 +88,7 @@ class HomePage extends StatelessWidget {
               title: const Text("Logout"),
               onTap: () {
                 appState.logout();
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
             ),
           ],

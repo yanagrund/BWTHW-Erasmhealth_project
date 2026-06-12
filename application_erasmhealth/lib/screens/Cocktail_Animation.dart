@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'LoginPage.dart';
 
 class CocktailAnimation extends StatefulWidget {
-  const CocktailAnimation({super.key});
+  final VoidCallback onDone;
+  const CocktailAnimation({super.key, required this.onDone});
 
   @override
   State<CocktailAnimation> createState() => _CocktailAnimationState();
@@ -15,17 +15,9 @@ class _CocktailAnimationState extends State<CocktailAnimation> {
   void initState() {
     super.initState();
 
-    Timer(
-      const Duration(seconds: 5),
-      () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const LoginPage(),
-          ),
-        );
-      },
-    );
+    Timer(const Duration(seconds: 5), () {
+      if (mounted) widget.onDone();
+    });
   }
 
   @override

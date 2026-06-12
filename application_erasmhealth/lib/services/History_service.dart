@@ -24,7 +24,8 @@ class HistoryService {
     }
 
     final dateFutures = List.generate(days, (index) {
-      final date = DateTime.now().subtract(Duration(days: index + 1));
+      // Offset by 2: day -1 is "today" (current score), so history starts at day -2.
+      final date = DateTime.now().subtract(Duration(days: index + 2));
       return fetchHistoryData(date);
     });
 
