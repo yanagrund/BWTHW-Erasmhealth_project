@@ -108,7 +108,10 @@ class _HistoryScreenState extends State<HistoryScreen>
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
-              onTap: () => appState.logout(),
+              onTap: () {
+                appState.logout();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
             ),
           ],
         ),

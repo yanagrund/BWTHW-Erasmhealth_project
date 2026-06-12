@@ -280,6 +280,7 @@ class _SimulationPageState extends State<SimulationPage> {
               title: const Text("Logout"),
               onTap: () {
                 appState.logout();
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
             ),
           ],
@@ -313,12 +314,12 @@ class _SimulationPageState extends State<SimulationPage> {
                     height: 230,
 
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.12),
+                      color: Colors.white.withValues(alpha: 0.12),
 
                       borderRadius: BorderRadius.circular(35),
 
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white.withValues(alpha: 0.5),
                         width: 4,
                       ),
                     ),
@@ -341,7 +342,7 @@ class _SimulationPageState extends State<SimulationPage> {
 
                           decoration: BoxDecoration(
                             color:
-                                Colors.white.withOpacity(0.85),
+                                Colors.white.withValues(alpha: 0.85),
 
                             borderRadius: BorderRadius.only(
                               bottomLeft:
@@ -382,7 +383,7 @@ class _SimulationPageState extends State<SimulationPage> {
 
                                 decoration: BoxDecoration(
                                   color: Colors.white
-                                      .withOpacity(0.7),
+                                      .withValues(alpha: 0.7),
 
                                   borderRadius:
                                       BorderRadius.circular(4),
@@ -412,7 +413,7 @@ class _SimulationPageState extends State<SimulationPage> {
 
                                 decoration: BoxDecoration(
                                   color: Colors.white
-                                      .withOpacity(0.65),
+                                      .withValues(alpha: 0.65),
 
                                   borderRadius:
                                       BorderRadius.circular(4),
@@ -441,7 +442,7 @@ class _SimulationPageState extends State<SimulationPage> {
 
                               decoration: BoxDecoration(
                                 color: Colors.white
-                                    .withOpacity(0.5),
+                                    .withValues(alpha: 0.5),
 
                                 shape: BoxShape.circle,
                               ),
@@ -477,7 +478,7 @@ class _SimulationPageState extends State<SimulationPage> {
                                 fontWeight: FontWeight.bold,
 
                                 color: simulatedScore > 45
-                                    ? color.withOpacity(0.8)
+                                    ? color.withValues(alpha: 0.8)
                                     : Colors.white70,
                               ),
                             ),
@@ -494,7 +495,7 @@ class _SimulationPageState extends State<SimulationPage> {
                     padding: const EdgeInsets.all(14),
 
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(18),
                     ),
 
@@ -557,7 +558,7 @@ class _SimulationPageState extends State<SimulationPage> {
                     ),
 
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.white.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(20),
                     ),
 
