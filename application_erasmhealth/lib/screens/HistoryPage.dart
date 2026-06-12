@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
 import 'package:application_erasmhealth/screens/RecoveryPage.dart';
 import 'package:application_erasmhealth/screens/SimulationPage.dart';
-import 'package:application_erasmhealth/services/history_service.dart';
+import 'package:application_erasmhealth/services/History_service.dart';
 import 'package:application_erasmhealth/services/health_score.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -17,6 +17,7 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  HistoryService? _historyService;
   final List<double> _scores = [0.0, 0.0, 0.0];
 
   @override
@@ -26,6 +27,15 @@ class _HistoryScreenState extends State<HistoryScreen>
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) setState(() {});
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Create once, reuse the authenticated Impact instance from AppState.
+    _historyService ??= HistoryService(
+      Provider.of<AppState>(context, listen: false).impactService,
+    );
   }
 
   @override
@@ -122,15 +132,24 @@ class _HistoryScreenState extends State<HistoryScreen>
         controller: _tabController,
         children: [
           HistorySubPage(
+            tabIndex: 0,
             period: 'Yesterday',
+            tabController: _tabController,
+            historyService: _historyService!,
             onScoreLoaded: (s) => _updateScore(0, s),
           ),
           HistorySubPage(
+            tabIndex: 1,
             period: 'Last Week',
+            tabController: _tabController,
+            historyService: _historyService!,
             onScoreLoaded: (s) => _updateScore(1, s),
           ),
           HistorySubPage(
+            tabIndex: 2,
             period: 'Last Month',
+            tabController: _tabController,
+            historyService: _historyService!,
             onScoreLoaded: (s) => _updateScore(2, s),
           ),
         ],
@@ -140,12 +159,18 @@ class _HistoryScreenState extends State<HistoryScreen>
 }
 
 class HistorySubPage extends StatefulWidget {
+  final int tabIndex;
   final String period;
+  final TabController tabController;
+  final HistoryService historyService;
   final void Function(double) onScoreLoaded;
 
   const HistorySubPage({
     super.key,
+    required this.tabIndex,
     required this.period,
+    required this.tabController,
+    required this.historyService,
     required this.onScoreLoaded,
   });
 
@@ -153,35 +178,57 @@ class HistorySubPage extends StatefulWidget {
   State<HistorySubPage> createState() => _HistorySubPageState();
 }
 
-class _HistorySubPageState extends State<HistorySubPage> {
-  bool isLoading = true;
+class _HistorySubPageState extends State<HistorySubPage>
+    with AutomaticKeepAliveClientMixin {
+  bool _loadStarted = false;
+  bool isLoading = false;
   double score = 0.0;
   Map<String, dynamic> data = {};
+
+  // Keep loaded tabs alive so switching back does not re-fetch.
+  @override
+  bool get wantKeepAlive => _loadStarted;
 
   @override
   void initState() {
     super.initState();
-    _loadHistoricalData();
+    widget.tabController.addListener(_onTabChanged);
+    // If this tab is already visible, start loading immediately.
+    // Set fields directly — setState must not be called during initState.
+    if (widget.tabController.index == widget.tabIndex) {
+      _loadStarted = true;
+      isLoading = true;
+      _loadHistoricalData();
+    }
   }
 
-  Color _getColor(double score) {
-    if (score <= 50) return Colors.red;
-    if (score <= 75) return Colors.orange;
-    return Colors.green;
+  @override
+  void dispose() {
+    widget.tabController.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    // Only triggered after the widget is fully mounted, so setState is safe.
+    if (widget.tabController.index == widget.tabIndex && !_loadStarted) {
+      setState(() {
+        _loadStarted = true;
+        isLoading = true;
+      });
+      _loadHistoricalData();
+    }
   }
 
   Future<void> _loadHistoricalData() async {
-    final appState = Provider.of<AppState>(context, listen: false);
-    final historyService = HistoryService(appState.impactService);
-
     Map<String, dynamic> fetchedData;
     if (widget.period == 'Yesterday') {
-      fetchedData = await historyService.fetchHistoryData(
-        DateTime.now().subtract(const Duration(days: 1)),
+      // Day -1 is "today" (most recent IMPACT data). Yesterday is day -2.
+      fetchedData = await widget.historyService.fetchHistoryData(
+        DateTime.now().subtract(const Duration(days: 2)),
       );
     } else {
       final days = (widget.period == 'Last Week') ? 7 : 30;
-      fetchedData = await historyService.fetchRangeData(days);
+      fetchedData = await widget.historyService.fetchRangeData(days);
     }
 
     final computedScore = HealthScoreService.compute(
@@ -203,9 +250,15 @@ class _HistorySubPageState extends State<HistorySubPage> {
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor(score);
+    super.build(context); // required by AutomaticKeepAliveClientMixin
 
-    if (isLoading) {
+    final color = score <= 50
+        ? Colors.red
+        : score <= 75
+            ? Colors.orange
+            : Colors.green;
+
+    if (!_loadStarted || isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.white),
       );
