@@ -146,6 +146,102 @@ class Impact {
     }
   }
 
+  // ── Date-range health fetch ───────────────────────────────────────────────────
+  // Fetches all 4 metrics for a date range using 4 parallel daterange requests.
+  // daterange envelope: { "data": [ { "date": "YYYY-MM-DD", "data": <inner> }, ... ] }
+  // Inner shapes are identical to the per-day endpoint (see below).
+
+  Future<Map<String, Map<String, dynamic>>> fetchHealthDataForRange(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final s = _fmt(start);
+    final e = _fmt(end);
+
+    try {
+      final results = await Future.wait([
+        _authorizedGet("$baseUrl$sleepEndpoint$username/daterange/start_date/$s/end_date/$e/"),
+        _authorizedGet("$baseUrl$heartRateEndpoint$username/daterange/start_date/$s/end_date/$e/"),
+        _authorizedGet("$baseUrl$restingHeartRateEndpoint$username/daterange/start_date/$s/end_date/$e/"),
+        _authorizedGet("$baseUrl$stepsEndpoint$username/daterange/start_date/$s/end_date/$e/"),
+      ]);
+
+      List<dynamic> days(int i) =>
+          (jsonDecode(results[i].body) as Map<String, dynamic>)["data"] as List? ?? [];
+
+      final Map<String, double> sleepByDate = {};
+      final Map<String, double> heartByDate = {};
+      final Map<String, double> restingByDate = {};
+      final Map<String, int> stepsByDate = {};
+
+      for (final day in days(0)) {
+        final date = day["date"] as String;
+        final inner = day["data"];
+        sleepByDate[date] = inner is Map
+            ? ((inner["minutesAsleep"] ?? 0) as num).toDouble() / 60.0
+            : 0.0;
+      }
+
+      for (final day in days(1)) {
+        final date = day["date"] as String;
+        final inner = day["data"];
+        if (inner is List && inner.isNotEmpty) {
+          double sum = 0;
+          for (final item in inner) { sum += (item["value"] as num).toDouble(); }
+          heartByDate[date] = sum / inner.length;
+        } else {
+          heartByDate[date] = 70.0;
+        }
+      }
+
+      for (final day in days(2)) {
+        final date = day["date"] as String;
+        final inner = day["data"];
+        restingByDate[date] = (inner is Map && inner["value"] != null)
+            ? (inner["value"] as num).toDouble()
+            : 70.0;
+      }
+
+      for (final day in days(3)) {
+        final date = day["date"] as String;
+        final inner = day["data"];
+        if (inner is List) {
+          int total = 0;
+          for (final item in inner) {
+            final v = item["value"];
+            if (v is num) {
+              total += v.toInt();
+            } else if (v is String) {
+              total += int.tryParse(v) ?? 0;
+            }
+          }
+          stepsByDate[date] = total;
+        } else {
+          stepsByDate[date] = 0;
+        }
+      }
+
+      final allDates = {
+        ...sleepByDate.keys,
+        ...heartByDate.keys,
+        ...restingByDate.keys,
+        ...stepsByDate.keys,
+      };
+
+      return {
+        for (final date in allDates)
+          date: {
+            "sleep": sleepByDate[date] ?? 0.0,
+            "heart": heartByDate[date] ?? 70.0,
+            "resting": restingByDate[date] ?? 70.0,
+            "steps": stepsByDate[date] ?? 0,
+          },
+      };
+    } catch (e) {
+      return {};
+    }
+  }
+
   // ── Core fetch ────────────────────────────────────────────────────────────────
   //
   // Every /day/ endpoint wraps its payload like this:
