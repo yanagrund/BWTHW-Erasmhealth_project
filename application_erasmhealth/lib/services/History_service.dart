@@ -23,31 +23,38 @@ class HistoryService {
       return {"sleep": 0.0, "heart": 70.0, "resting": 70.0, "steps": 0};
     }
 
-    final dateFutures = List.generate(days, (index) {
-      // Offset by 2: day -1 is "today" (current score), so history starts at day -2.
-      final date = DateTime.now().subtract(Duration(days: index + 2));
-      return fetchHistoryData(date);
-    });
+    // Day -1 is "today's" score; history starts at day -2.
+    final end = DateTime.now().subtract(const Duration(days: 2));
+    final start = end.subtract(Duration(days: days - 1));
 
-    final results = await Future.wait(dateFutures);
+    // 4 parallel daterange requests instead of days×4 individual requests.
+    final perDayData = await impactService.fetchHealthDataForRange(start, end);
 
-    double totalSleep = 0;
-    double totalHeart = 0;
-    double totalResting = 0;
+    // Populate per-day cache so the Yesterday tab reuses these results.
+    for (final entry in perDayData.entries) {
+      _historyCache.putIfAbsent(entry.key, () => Future.value(entry.value));
+    }
+
+    if (perDayData.isEmpty) {
+      return {"sleep": 0.0, "heart": 70.0, "resting": 70.0, "steps": 0};
+    }
+
+    double totalSleep = 0, totalHeart = 0, totalResting = 0;
     int totalSteps = 0;
 
-    for (final data in results) {
+    for (final data in perDayData.values) {
       totalSleep += (data["sleep"] as num).toDouble();
       totalHeart += (data["heart"] as num).toDouble();
       totalResting += (data["resting"] as num).toDouble();
       totalSteps += data["steps"] as int;
     }
 
+    final count = perDayData.length;
     return {
-      "sleep": totalSleep / days,
-      "heart": totalHeart / days,
-      "resting": totalResting / days,
-      "steps": (totalSteps / days).toInt(),
+      "sleep": totalSleep / count,
+      "heart": totalHeart / count,
+      "resting": totalResting / count,
+      "steps": (totalSteps / count).toInt(),
     };
   }
 
