@@ -1,4 +1,4 @@
-import 'package:application_erasmhealth/screens/homePage.dart';
+import 'package:application_erasmhealth/screens/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:application_erasmhealth/providers/app_state.dart';
