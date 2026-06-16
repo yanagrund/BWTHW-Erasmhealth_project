@@ -118,6 +118,7 @@ class Impact {
     final endDt = DateTime.now().subtract(const Duration(days: 1));
     final startDt = endDt.subtract(const Duration(days: 6));
 
+
     try {
       final response = await _authorizedGet(
         '$baseUrl$stepsEndpoint$username/daterange/start_date/${_fmt(startDt)}/end_date/${_fmt(endDt)}/',
@@ -254,6 +255,8 @@ class Impact {
   //   steps      → List  [ { "time": "00:13:00", "value": "0" }, ... ]  ← value is a STRING
 
   Future<Map<String, dynamic>> fetchHealthDataForDate(String date) async {
+    print("fetchHealthDataForDate($date)");
+
     try {
       final results = await Future.wait([
         _authorizedGet("$baseUrl$sleepEndpoint$username/day/$date/"),
@@ -268,15 +271,50 @@ class Impact {
       final stepsJson = jsonDecode(results[3].body) as Map<String, dynamic>;
 
       // Helper: safely reach json["data"]["data"]
-      dynamic inner(Map<String, dynamic> j) => (j["data"] as Map?)?["data"];
+      dynamic inner(Map<String, dynamic> j) {
+      final outer = j["data"];
+
+      if (outer is Map) {
+       return outer["data"];
+      }
+
+       return null;
+      }
 
       // ── Sleep ────────────────────────────────────────────────────────────────
       // Inner is a Map with top-level "minutesAsleep"
+      // impact does not have data for "yesterday", take data from "day before yesterday" --> night between yesterday and day before yesterday
       double sleep = 0.0;
       final sleepInner = inner(sleepJson);
+
       if (sleepInner is Map) {
-        sleep = ((sleepInner["minutesAsleep"] ?? 0) as num).toDouble() / 60.0;
-      }
+      sleep = ((sleepInner["minutesAsleep"] ?? 0) as num).toDouble() / 60.0;
+        } else {
+      // No sleep data for this day -> try previous day
+      try {
+       final previousDate = _fmt(
+        DateTime.parse(date).subtract(const Duration(days: 1)),
+      );
+
+      final previousSleepResponse = await _authorizedGet(
+      "$baseUrl$sleepEndpoint$username/day/$previousDate/",
+      );
+
+    final previousSleepJson =
+        jsonDecode(previousSleepResponse.body) as Map<String, dynamic>;
+
+    final previousSleepInner = inner(previousSleepJson);
+
+    if (previousSleepInner is Map) {
+      sleep =
+          ((previousSleepInner["minutesAsleep"] ?? 0) as num)
+              .toDouble() /
+          60.0;
+    }
+  } catch (_) {
+    sleep = 0.0;
+  }
+}
 
       // ── Heart rate ───────────────────────────────────────────────────────────
       // Inner is a List; average all "value" entries
