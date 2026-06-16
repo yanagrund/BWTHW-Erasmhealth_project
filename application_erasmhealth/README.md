@@ -47,10 +47,9 @@ application_erasmhealth/
 │       ├── HistoryPage.dart        # Tabbed view: Yesterday / Last Week / Last Month
 │       ├── RecoveryPage.dart       # Time-to-recovery countdown and daily improvement
 │       └── SimulationPage.dart     # What-if score simulator
-├── assets/
-│   └── animations/
-│       └── cocktail_loading.json  # Lottie animation shown on the splash screen
-└── postman/                       # Postman collection for manually testing the IMPACT API
+└── assets/
+   └── animations/
+       └── cocktail_loading.json  # Lottie animation shown on the splash screen
 ```
 
 ---
