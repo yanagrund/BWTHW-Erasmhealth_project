@@ -11,11 +11,14 @@ class HistoryService {
   }
 
   Future<Map<String, dynamic>> fetchHistoryData(DateTime date) {
-    final formattedDate = _formatDate(date);
-    return _historyCache.putIfAbsent(
-      formattedDate,
-      () => impactService.fetchHealthDataForDate(formattedDate),
-    );
+  final formattedDate = _formatDate(date);
+
+  print("REQUESTING DATE: $formattedDate");
+
+  return _historyCache.putIfAbsent(
+    formattedDate,
+    () => impactService.fetchHealthDataForDate(formattedDate),
+  );
   }
 
   Future<Map<String, dynamic>> fetchRangeData(int days) async {
@@ -24,12 +27,32 @@ class HistoryService {
     }
 
     // Day -1 is "today's" score; history starts at day -2.
+    // Impact accepts only to retrieve data up to 7 days at a time, so we chunk the requests if needed.
     final end = DateTime.now().subtract(const Duration(days: 2));
-    final start = end.subtract(Duration(days: days - 1));
 
-    // 4 parallel daterange requests instead of days×4 individual requests.
-    final perDayData = await impactService.fetchHealthDataForRange(start, end);
+    final Map<String, Map<String, dynamic>> perDayData = {};
 
+    DateTime chunkEnd = end;
+    int remainingDays = days;
+
+    while (remainingDays > 0) {
+      final chunkSize = remainingDays > 7 ? 7 : remainingDays;
+
+      final chunkStart = chunkEnd.subtract(
+        Duration(days: chunkSize - 1),
+      );
+
+      final chunkData =
+        await impactService.fetchHealthDataForRange(
+          chunkStart,
+          chunkEnd,
+        );
+
+      perDayData.addAll(chunkData);
+
+      remainingDays -= chunkSize;
+      chunkEnd = chunkStart.subtract(const Duration(days: 1));
+    }
     // Populate per-day cache so the Yesterday tab reuses these results.
     for (final entry in perDayData.entries) {
       _historyCache.putIfAbsent(entry.key, () => Future.value(entry.value));

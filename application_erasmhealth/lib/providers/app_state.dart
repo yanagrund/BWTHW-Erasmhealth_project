@@ -76,6 +76,7 @@ class AppState extends ChangeNotifier {
     }
 
     final latestDate = latestDates.last;
+
     final data = await impactService.fetchHealthDataForDate(latestDate);
 
     sleep = data["sleep"];
